@@ -1,7 +1,7 @@
 services:
-  db:
+  postgres:
     image: postgres:16-alpine
-    container_name: graph-postgres
+    container_name: graph-hack-postgres
     restart: unless-stopped
     environment:
       POSTGRES_USER: postgres
@@ -16,6 +16,33 @@ services:
       interval: 5s
       timeout: 5s
       retries: 10
-      
+    networks:
+      - graph-hack-network
+
+  falkordb:
+    image: falkordb/falkordb:latest
+    container_name: graph-hack-falkordb
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+      - "3000:3000"
+    environment:
+      REDIS_ARGS: "--requirepass yourpassword"
+      FALKORDB_ARGS: "THREAD_COUNT 4"
+    volumes:
+      - falkordb_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - graph-hack-network
+
 volumes:
   postgres_data:
+  falkordb_data:
+
+networks:
+  graph-hack-network:
+    driver: bridge
