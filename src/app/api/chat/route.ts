@@ -37,7 +37,6 @@ export async function POST(req: NextRequest) {
       messages,
     });
 
-    console.log(result);
     // Get the last AI response, not a tool message.
     const lastAIMessage = [...result.messages]
       .reverse()

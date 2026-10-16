@@ -14,6 +14,7 @@
     "@langchain/openai": "^1.6.2",
     "@prisma/adapter-pg": "^7.10.1",
     "@prisma/client": "7",
+    "clsx": "^2.1.1",
     "dotenv": "^18.0.8",
     "falkordb": "^6.8.0",
     "langchain": "^1.5.18",
@@ -21,6 +22,7 @@
     "pg": "^8.23.1",
     "react": "19.3.0",
     "react-dom": "19.3.0",
+    "tailwind-merge": "^3.7.0",
     "zod": "^4.6.7"
   },
   "devDependencies": {
