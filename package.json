@@ -6,6 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "ingest": "tsx scripts/ingest-codebase.ts",
     "lint": "eslint"
   },
   "dependencies": {

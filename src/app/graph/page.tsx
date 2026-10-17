@@ -128,7 +128,7 @@ export default function GraphPage() {
           />
 
           {/* Top Sub-bar with Legend - guaranteed min-h and shrink-0 to prevent any clipping */}
-          <div className="shrink-0 relative z-20 border-b border-zinc-200/70 dark:border-zinc-800/80 bg-zinc-50/80 dark:bg-[#121614]/80 backdrop-blur-md px-4 py-2.5 flex items-center justify-between min-h-[50px]">
+          <div className="shrink-0 relative z-20 border-b border-zinc-200/70 dark:border-zinc-800/80 bg-zinc-50/80 dark:bg-[#121614]/80 backdrop-blur-md px-4 py-2.5 flex items-center justify-between min-h-12.5">
             <GraphLegend
               activeFilter={selectedCategory}
               onFilterChange={setSelectedCategory}

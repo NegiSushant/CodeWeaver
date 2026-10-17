@@ -1,13 +1,16 @@
 import fs from "fs";
 import path from "path";
 import { FalkorDB } from "falkordb";
+import { execSync } from "child_process";
 
 // Configuration
 const GRAPH_NAME = "codeweaver";
-const PROJECT_ROOT = path.join(
-  process.cwd(),
-  "Autonomous-Prior-Authorization-Agent",
-);
+const REPO_URL =
+  "https://github.com/NegiSushant/Autonomous-Prior-Authorization-Agent.git";
+const REPO_DIR = path.join(process.cwd(), "temp-repo");
+
+// Use the cloned repo as project root
+const PROJECT_ROOT = REPO_DIR;
 
 const FALKORDB_HOST = process.env.FALKORDB_HOST || "localhost";
 const FALKORDB_PORT = Number(process.env.FALKORDB_PORT || 6379);
@@ -246,9 +249,76 @@ function extractExports(content: string): {
   return { functions, classes };
 }
 
+function cloneRepo() {
+  console.log("Cloning repository...");
+
+  // Remove old temp folder if exists
+  if (fs.existsSync(REPO_DIR)) {
+    fs.rmSync(REPO_DIR, { recursive: true, force: true });
+  }
+
+  execSync(`git clone --depth 1 ${REPO_URL} ${REPO_DIR}`, {
+    stdio: "inherit",
+  });
+
+  console.log("Repository cloned successfully.\n");
+}
+
+function cleanupRepo() {
+  if (!fs.existsSync(REPO_DIR)) return;
+
+  console.log("\nCleaning up temporary repository...");
+
+  try {
+    fs.rmSync(REPO_DIR, {
+      recursive: true,
+      force: true,
+      maxRetries: 3,
+      retryDelay: 500,
+    });
+    console.log("Temporary repository deleted successfully.");
+  } catch {
+    console.warn(
+      "Could not fully delete temp-repo (file locked). Trying alternative method...",
+    );
+
+    const trashDir = path.join(process.cwd(), `temp-repo-trash-${Date.now()}`);
+
+    try {
+      fs.renameSync(REPO_DIR, trashDir);
+      console.log(
+        "Temporary repository moved to trash folder. You can delete it manually later.",
+      );
+
+      // Try deleting the renamed folder in background
+      setTimeout(() => {
+        try {
+          fs.rmSync(trashDir, { recursive: true, force: true });
+        } catch {
+          // Ignore - user can delete manually
+        }
+      }, 2000);
+    } catch {
+      console.warn(
+        "Cleanup failed. Please delete the 'temp-repo' folder manually.",
+      );
+    }
+  }
+}
+
 // Main Ingestion Logic
 async function main() {
   console.log("Starting Ingestion...\n");
+
+  // Clone the repo first
+  cloneRepo();
+
+  console.log("PROJECT_ROOT =", PROJECT_ROOT);
+  console.log("Does PROJECT_ROOT exist?", fs.existsSync(PROJECT_ROOT));
+  console.log(
+    "Contents of PROJECT_ROOT:",
+    fs.existsSync(PROJECT_ROOT) ? fs.readdirSync(PROJECT_ROOT) : "NOT FOUND",
+  );
 
   const client = await FalkorDB.connect({
     host: FALKORDB_HOST,
@@ -405,7 +475,7 @@ async function main() {
           { params: { fromPath: rel.fromPath, toName: rel.toName } },
         );
       }
-    } catch (err) {
+    } catch {
       console.warn(`Could not create relationship for ${rel.fromPath}`);
     }
   }
@@ -421,6 +491,10 @@ async function main() {
   console.table(stats.data);
 
   console.log("\nIngestion completed successfully!");
+
+  // Delete the temporary cloned repository
+  cleanupRepo();
+
   await client.close();
 }
 
