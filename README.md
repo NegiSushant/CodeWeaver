@@ -38,7 +38,7 @@ Every answer returned by CodeWeaver is **100% explainable**:
 
 ## 🎬 Demo
 
-- **Video Demo**: `[Demo Video Link - Loom / YouTube]` *(Add your video link here)*
+- **Video Demo**: `[Demo Video Link - Loom / YouTube]` *(https://youtu.be/0gjnDK7I5U8)*
 - **Live Demo**: `http://localhost:3001` *(Follow setup instructions below to run locally)*
 - **Dev Article**: `somewhereondev`
 
