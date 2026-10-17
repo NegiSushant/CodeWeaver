@@ -5,7 +5,6 @@ import {
   ToolMessage,
   BaseMessage,
 } from "@langchain/core/messages";
-
 import agent from "@/lib/agents/reactAgent";
 import { getCodeGraph } from "@/lib/falkordb";
 import prismaClient from "@/lib/prisma";
@@ -13,7 +12,6 @@ import { getAuthenticatedUserId } from "@/lib/auth-helper";
 
 function collectReasoningNodeIds(messages: BaseMessage[]): number[] {
   const ids = new Set<number>();
-
   const scan = (item: unknown) => {
     if (!item) return;
     if (typeof item === "number") return;
@@ -22,7 +20,9 @@ function collectReasoningNodeIds(messages: BaseMessage[]): number[] {
       return;
     }
     if (typeof item === "object") {
-      for (const [key, val] of Object.entries(item as Record<string, unknown>)) {
+      for (const [key, val] of Object.entries(
+        item as Record<string, unknown>,
+      )) {
         if (
           (key.endsWith("_id") || key === "id" || key === "nodeId") &&
           typeof val === "number"
@@ -60,12 +60,8 @@ function collectReasoningNodeIds(messages: BaseMessage[]): number[] {
 
     if (!raw) continue;
 
-    try {
-      const parsed = JSON.parse(raw);
-      scan(parsed);
-    } catch {
-      // Tool message wasn't JSON — skip
-    }
+    const parsed = JSON.parse(raw);
+    scan(parsed);
   }
 
   return [...ids];
@@ -82,10 +78,8 @@ export async function POST(req: NextRequest) {
         { status: 400 },
       );
     }
-
     const userId = await getAuthenticatedUserId();
 
-    // Session Management: Find or create a session
     let activeSessionId: string | null = null;
 
     if (userId) {
@@ -100,8 +94,7 @@ export async function POST(req: NextRequest) {
 
       if (!activeSessionId) {
         const trimmed = message.trim();
-        const title =
-          trimmed.slice(0, 45) + (trimmed.length > 45 ? "..." : "");
+        const title = trimmed.slice(0, 45) + (trimmed.length > 45 ? "..." : "");
         const newSession = await prismaClient.chatSession.create({
           data: {
             userId,
@@ -111,7 +104,6 @@ export async function POST(req: NextRequest) {
         activeSessionId = newSession.id;
       }
 
-      // Persist the incoming user message
       await prismaClient.chatMessage.create({
         data: {
           sessionId: activeSessionId,
@@ -121,7 +113,6 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    // Convert frontend chat history into LangChain messages.
     const historyMessages: BaseMessage[] = history.map(
       (msg: { role: string; content: string }) => {
         if (msg.role === "user") return new HumanMessage(msg.content);
@@ -154,8 +145,7 @@ export async function POST(req: NextRequest) {
 
     let reasoningNodeIds = collectReasoningNodeIds(result.messages);
 
-    // If no node IDs were extracted directly from tool calls,
-    // match nodes mentioned by name in the assistant reply or user query.
+    // If their is no node IDs comes from tool calls, match nodes mentioned by name in the assistant reply or user query.
     if (reasoningNodeIds.length === 0) {
       try {
         const graph = await getCodeGraph();
@@ -193,11 +183,11 @@ export async function POST(req: NextRequest) {
           reasoningNodeIds = [...matchedSet];
         }
       } catch (err) {
-        console.warn("Reasoning node fallback search error:", err);
+        console.error("Reasoning node fallback search error:", err);
       }
     }
 
-    // Persist the assistant message
+    // Persist the assistant message into db
     if (activeSessionId) {
       await prismaClient.chatMessage.create({
         data: {
@@ -221,7 +211,6 @@ export async function POST(req: NextRequest) {
     });
   } catch (error: unknown) {
     console.error("Chat API Error:", error);
-
     return NextResponse.json(
       {
         error: "Failed to process request",
