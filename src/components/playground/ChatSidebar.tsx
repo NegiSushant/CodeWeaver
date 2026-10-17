@@ -40,7 +40,6 @@ export function ChatSidebar({
           : "w-0 -translate-x-full md:w-0 md:translate-x-0 opacity-0 overflow-hidden pointer-events-none"
       }`}
     >
-      {/* Top Header / Actions */}
       <div className="p-3.5 border-b border-zinc-200/70 dark:border-zinc-800/80 flex items-center gap-2">
         <button
           type="button"
@@ -62,7 +61,7 @@ export function ChatSidebar({
         </button>
       </div>
 
-      {/* History Session List */}
+      {/*List of History Sessions */}
       <div className="flex-1 overflow-y-auto px-2.5 py-3 space-y-1">
         <div className="px-2 py-1 flex items-center justify-between text-[11px] font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
           <span>Conversations</span>
@@ -112,7 +111,7 @@ export function ChatSidebar({
                   <span className="truncate">{session.title}</span>
                 </div>
 
-                {/* Delete button on hover or active */}
+                {/*Chat Session Delete button */}
                 <button
                   type="button"
                   title="Delete conversation"
@@ -131,7 +130,7 @@ export function ChatSidebar({
         )}
       </div>
 
-      {/* Footer Navigation link */}
+      {/* Navigation Footer link */}
       <div className="p-3 border-t border-zinc-200/70 dark:border-zinc-800/80 bg-zinc-50/50 dark:bg-zinc-950/40">
         <Link
           href="/graph"

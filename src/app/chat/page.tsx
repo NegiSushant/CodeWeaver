@@ -160,7 +160,7 @@ export default function ChatPage() {
         setActiveSessionId(data.sessionId);
       }
 
-      // Refresh sessions in background to update title & last updated timestamp
+      // Refresh sessions in background when update title & last updated timestamp
       refreshSessions();
     } catch {
       const errorMessage: Message = {
@@ -178,7 +178,7 @@ export default function ChatPage() {
 
   return (
     <div className="relative flex h-[calc(100vh-61px)] w-full overflow-hidden bg-[#fbf9f5] dark:bg-[#0c0f0d] text-zinc-900 dark:text-zinc-100 transition-colors duration-200">
-      {/* Grok-style Chat History Sidebar */}
+      {/* Chat History Sidebar */}
       <ChatSidebar
         isOpen={isSidebarOpen}
         onToggle={() => setIsSidebarOpen((prev) => !prev)}
@@ -192,7 +192,7 @@ export default function ChatPage() {
 
       {/* Main Chat Area */}
       <div className="relative flex flex-1 flex-col h-full min-w-0 overflow-hidden">
-        {/* Toggle button when sidebar is collapsed */}
+        {/* Toggle button to close and open sidebar*/}
         {!isSidebarOpen && (
           <div className="absolute top-3.5 left-4 z-20">
             <button
@@ -207,7 +207,7 @@ export default function ChatPage() {
           </div>
         )}
 
-        {/* Repeating watermark background */}
+        {/* watermark Repeatation background */}
         <div
           className="pointer-events-none absolute inset-0 z-0 overflow-hidden select-none"
           aria-hidden="true"
@@ -216,7 +216,7 @@ export default function ChatPage() {
             {Array.from({ length: 24 }).map((_, index) => (
               <span
                 key={index}
-                className="whitespace-nowrap text-[clamp(1.5rem,3vw,3rem)] font-black tracking-widest uppercase text-zinc-900/[0.035] dark:text-white/[0.04]"
+                className="whitespace-nowrap text-[clamp(1.5rem,3vw,3rem)] font-black tracking-widest uppercase text-zinc-900/[0.035] dark:text-white/4"
               >
                 CodeWeaver
               </span>
@@ -224,7 +224,7 @@ export default function ChatPage() {
           </div>
         </div>
 
-        {/* Messages & Input */}
+        {/* Messages & Input window */}
         <div className="relative z-10 flex flex-col flex-1 h-full min-w-0 max-w-4xl mx-auto w-full">
           <MessageList
             messages={messages}
@@ -239,7 +239,7 @@ export default function ChatPage() {
         </div>
       </div>
 
-      {/* Reasoning subgraph modal */}
+      {/* Agent response source graph */}
       <ReasoningPathModal
         isOpen={isModalOpen}
         onClose={handleCloseGraphModal}

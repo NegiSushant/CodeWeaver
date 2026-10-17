@@ -48,8 +48,7 @@ export function ReasoningPathModal({
     };
   }, [isOpen, onClose]);
 
-  // If nodeIds was empty (e.g. from existing session messages), automatically
-  // load the architecture module & feature nodes so the user gets an intuitive visual subgraph.
+  // If nodeIds was empty, automatically load the architecture module & feature nodes so the user gets an intuitive visual subgraph.
   useEffect(() => {
     let cancelled = false;
     if (isOpen && nodeIds.length === 0 && fallbackNodeIds.length === 0) {

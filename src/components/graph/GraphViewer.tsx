@@ -25,15 +25,10 @@ const HIGHLIGHTED_RADIUS_MULTIPLIER = 1.8;
 const DEFAULT_RADIUS = 5.5;
 
 interface GraphViewerProps {
-  /** Node IDs that were part of the latest reasoning path */
   highlightedNodeIds?: number[];
-  /** When true, only displays nodes in highlightedNodeIds and connecting links */
   filterOnlyHighlighted?: boolean;
-  /** Whether to show the toolbar with zoom/search controls */
   showControls?: boolean;
-  /** Filter nodes by category/label */
   selectedLabelFilter?: string | null;
-  /** Callback with computed graph statistics */
   onStatsLoaded?: (stats: {
     nodeCount: number;
     linkCount: number;

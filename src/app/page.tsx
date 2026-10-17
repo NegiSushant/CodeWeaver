@@ -1,10 +1,10 @@
-import { Hero } from "@/components/Hero";
-import { Problem } from "@/components/Problem";
-import { Solution } from "@/components/Solution";
-import { Features } from "@/components/Features";
-import { HowItWorks } from "@/components/HowItWorks";
-import { TechStack } from "@/components/TechStack";
-import { CTA } from "@/components/CTA";
+import { Hero } from "@/components/landing-page/Hero";
+import { Problem } from "@/components/landing-page/Problem";
+import { Solution } from "@/components/landing-page/Solution";
+import { Features } from "@/components/landing-page/Features";
+import { HowItWorks } from "@/components/landing-page/HowItWorks";
+import { TechStack } from "@/components/landing-page/TechStack";
+import { CTA } from "@/components/landing-page/CTA";
 
 export default function LandingPage() {
   return (

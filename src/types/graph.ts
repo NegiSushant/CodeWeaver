@@ -1,7 +1,3 @@
-// ────────────────────────────────────────────────────────────────────────────
-// Graph shared types used by API routes, tools, and frontend components
-// ────────────────────────────────────────────────────────────────────────────
-
 /** Node labels that exist in the FalkorDB codeweaver graph */
 export type NodeLabel =
   | "File"

@@ -4,7 +4,7 @@ import { useEffect, useRef } from "react";
 import { Message } from "@/types/chat";
 import { MessageBubble } from "./MessageBubble";
 import { LoadingIndicator } from "./LoadingIndicator";
-import { SampleQuestions } from "./SampleQuestions";
+import { ChatSampleQuestions } from "./ChatSampleQuestions";
 
 interface MessageListProps {
   messages: Message[];
@@ -31,15 +31,19 @@ export function MessageList({
         <div className="h-full flex flex-col items-center justify-center text-center">
           <div className="mb-4">
             <h2 className="text-xl font-bold tracking-tight text-zinc-800 dark:text-zinc-100">
-              Welcome to <span className="text-[#566e4e] dark:text-[#a3b18a]">CodeWeaver</span>
+              Welcome to{" "}
+              <span className="text-[#566e4e] dark:text-[#a3b18a]">
+                CodeWeaver
+              </span>
             </h2>
             <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1 max-w-md">
-              Ask deep architectural questions, discover dependencies, and inspect reasoning paths across your codebase.
+              Ask deep architectural questions, discover dependencies, and
+              inspect reasoning paths across your codebase.
             </p>
           </div>
 
           {onSelectSampleQuestion && (
-            <SampleQuestions
+            <ChatSampleQuestions
               onSelectQuestion={onSelectSampleQuestion}
               disabled={isLoading}
             />

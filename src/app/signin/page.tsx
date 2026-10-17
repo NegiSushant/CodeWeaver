@@ -49,7 +49,7 @@ function SignInForm() {
           Welcome back
         </h1>
         <p className="text-zinc-500 dark:text-zinc-400 text-sm mt-2">
-          Sign in to access your playground and graph analyses
+          Sign in to ask about codebase and accessing graph analyses
         </p>
       </div>
 

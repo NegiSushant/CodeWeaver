@@ -9,7 +9,6 @@ export default function Navbar() {
   return (
     <header className="sticky top-0 z-50 w-full backdrop-blur-xl bg-white/80 dark:bg-[#0c0f0d]/85 border-b border-zinc-200/80 dark:border-zinc-800/80 transition-colors duration-200">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between gap-4">
-        {/* Brand / Logo */}
         <Link
           href="/"
           className="group flex items-center gap-2.5 focus:outline-none"
@@ -33,15 +32,14 @@ export default function Navbar() {
           </div>
           <div className="flex items-center gap-1.5">
             <span className="text-lg font-bold tracking-tight text-zinc-900 dark:text-white">
-              Code<span className="text-[#566e4e] dark:text-[#a3b18a]">Weaver</span>
+              Code
+              <span className="text-[#566e4e] dark:text-[#a3b18a]">Weaver</span>
             </span>
             <span className="hidden sm:inline-flex rounded-md bg-[#a3b18a]/20 px-1.5 py-0.5 text-[10px] font-semibold text-[#2d3a2b] dark:text-[#cce3c0] border border-[#a3b18a]/30">
               GRAPH
             </span>
           </div>
         </Link>
-
-        {/* Navigation & Theme Toggle Cluster */}
         <div className="flex items-center gap-2 sm:gap-4">
           <Suspense
             fallback={
@@ -53,11 +51,9 @@ export default function Navbar() {
           >
             <NavLinks />
           </Suspense>
-
           <ThemeToggle />
         </div>
       </div>
     </header>
   );
 }
-

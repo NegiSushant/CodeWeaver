@@ -1,6 +1,12 @@
 import { NextResponse } from "next/server";
 import { getCodeGraph } from "@/lib/falkordb";
-import type { GraphData, GraphNode, GraphLink, NodeLabel, RelationshipType } from "@/types/graph";
+import type {
+  GraphData,
+  GraphNode,
+  GraphLink,
+  NodeLabel,
+  RelationshipType,
+} from "@/types/graph";
 
 interface RawNodeRow {
   id: number;
@@ -16,20 +22,14 @@ interface RawLinkRow {
   type: string;
 }
 
-
 export async function GET() {
   try {
     const graph = await getCodeGraph();
 
     const nodeResult = await graph.query(`
-      MATCH (n)
-      WHERE n.name IS NOT NULL
-      RETURN
-        ID(n)              AS id,
-        labels(n)[0]       AS label,
-        n.name             AS name,
-        n.path             AS path,
-        n.description      AS description
+      MATCH (n) WHERE n.name IS NOT NULL 
+      RETURN 
+      ID(n) AS id, labels(n)[0] AS label, n.name AS name, n.path AS path, n.description AS description
       LIMIT 500
     `);
 
@@ -42,14 +42,11 @@ export async function GET() {
         ...(row.description ? { description: row.description } : {}),
       }),
     );
-    
+
     const linkResult = await graph.query(`
       MATCH (a)-[r]->(b)
       WHERE a.name IS NOT NULL AND b.name IS NOT NULL
-      RETURN
-        ID(a)    AS source,
-        ID(b)    AS target,
-        type(r)  AS type
+      RETURN ID(a) AS source, ID(b) AS target, type(r) AS type
       LIMIT 500
     `);
 
@@ -69,7 +66,9 @@ export async function GET() {
       {
         error: "Failed to fetch graph data",
         details:
-          error instanceof Error ? error.message : "An unexpected error occurred",
+          error instanceof Error
+            ? error.message
+            : "An unexpected error occurred",
       },
       { status: 500 },
     );

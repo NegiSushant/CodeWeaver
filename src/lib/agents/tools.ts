@@ -3,7 +3,6 @@ import { z } from "zod";
 import { getCodeGraph } from "@/lib/falkordb";
 import type { ToolResult } from "@/types/graph";
 
-// ─── Helpers ────────────────────────────────────────────────────────────────
 /**
  * Extract unique numeric node IDs from a raw FalkorDB result set.
  * Each row may carry one or more `_id` columns produced by `ID(node)` calls
@@ -37,15 +36,15 @@ function extractNodeIds(rows: Record<string, unknown>[]): number[] {
   }
   return [...ids];
 }
-//General Graph Query
+
+//General Graph Query Tool
 export const queryGraphTool = tool(
   async ({ cypher }): Promise<string> => {
     const graph = await getCodeGraph();
     const result = await graph.query(cypher);
     const rows = (result.data ?? []) as Record<string, unknown>[];
     const nodeIds = extractNodeIds(rows);
-    // If the query returned node objects themselves (not plain values),
-    // attempt to pull .id off them as a fallback.
+    // If the query returned node objects themselves (not plain values), attempt to pull .id off them as a fallback.
     if (nodeIds.length === 0) {
       for (const row of rows) {
         for (const val of Object.values(row)) {
@@ -66,17 +65,17 @@ export const queryGraphTool = tool(
   {
     name: "query_graph",
     description: `Execute a Cypher query on the codebase knowledge graph.
-Use this for complex questions about structure, relationships, and architecture.
-Available node labels: File, Function, Class, Module, Feature, Person
-Available relationships: BELONGS_TO, CALLS, USES, IMPLEMENTS, OWNED_BY, RELATED_TO
-To capture node IDs in your query, include ID(n) AS n_id in the RETURN clause.`,
+    Use this for complex questions about structure, relationships, and architecture.
+    Available node labels: File, Function, Class, Module, Feature, Person
+    Available relationships: BELONGS_TO, CALLS, USES, IMPLEMENTS, OWNED_BY, RELATED_TO
+    To capture node IDs in your query, include ID(n) AS n_id in the RETURN clause.`,
     schema: z.object({
       cypher: z.string().describe("The Cypher query to execute"),
     }),
   },
 );
 
-//Find Impact of a File/Function
+//Find Impact of a File/Function Tool
 export const findImpactTool = tool(
   async ({ name }): Promise<string> => {
     const graph = await getCodeGraph();
@@ -86,12 +85,7 @@ export const findImpactTool = tool(
       WHERE n.name CONTAINS $name OR n.path CONTAINS $name
       OPTIONAL MATCH (n)<-[:BELONGS_TO|CALLS|USES*1..2]-(dependent)
        RETURN DISTINCT
-        ID(n)         AS n_id,
-        labels(n)[0]  AS type,
-        n.name        AS name,
-        n.path        AS path,
-        collect(DISTINCT ID(dependent)) AS dep_ids,
-        collect(DISTINCT dependent.name) AS impacted_by
+        ID(n) AS n_id, labels(n)[0] AS type, n.name AS name, n.path AS path, collect(DISTINCT ID(dependent)) AS dep_ids, collect(DISTINCT dependent.name) AS impacted_by
       LIMIT 15
       `,
       { params: { name } },
@@ -111,7 +105,7 @@ export const findImpactTool = tool(
   },
 );
 
-//Find Owners / Experts
+//Find Owners / Experts Tool
 export const findOwnersTool = tool(
   async ({ name }): Promise<string> => {
     const graph = await getCodeGraph();
@@ -120,12 +114,8 @@ export const findOwnersTool = tool(
       MATCH (n)-[:OWNED_BY]->(p:Person)
       WHERE n.name CONTAINS $name OR n.path CONTAINS $name
       RETURN
-        ID(n) AS n_id,
-        ID(p) AS p_id,
-        n.name AS item,
-        n.path AS path,
-        p.name AS owner,
-        p.role AS role`,
+        ID(n) AS n_id, ID(p) AS p_id, n.name AS item, n.path AS path, p.name AS owner, p.role AS role
+      `,
       { params: { name } },
     );
     const rows = (result.data ?? []) as Record<string, unknown>[];
@@ -142,7 +132,7 @@ export const findOwnersTool = tool(
   },
 );
 
-//Explain Feature Implementation
+//Explain Feature Implementation Tool
 export const explainFeatureTool = tool(
   async ({ featureName }): Promise<string> => {
     const graph = await getCodeGraph();
@@ -151,13 +141,7 @@ export const explainFeatureTool = tool(
       MATCH (n)-[:IMPLEMENTS]->(f:Feature)
       WHERE f.name CONTAINS $featureName
       RETURN
-        ID(n) AS n_id,
-        ID(f) AS f_id,
-        f.name        AS feature,
-        f.description AS description,
-        labels(n)[0]  AS type,
-        n.name        AS name,
-        n.path        AS path
+        ID(n) AS n_id, ID(f) AS f_id, f.name AS feature, f.description AS description, labels(n)[0] AS type, n.name AS name, n.path AS path
       `,
       { params: { featureName } },
     );
@@ -179,7 +163,7 @@ export const explainFeatureTool = tool(
   },
 );
 
-//Get Architecture Overview
+//Get Architecture Overview Tool
 export const getArchitectureTool = tool(
   async (): Promise<string> => {
     const graph = await getCodeGraph();
@@ -187,11 +171,7 @@ export const getArchitectureTool = tool(
       MATCH (m:Module)
       OPTIONAL MATCH (f:File)-[:BELONGS_TO]->(m)
       RETURN
-        ID(m)         AS m_id,
-        m.name        AS module,
-        m.description AS description,
-        count(f)      AS file_count,
-        collect(ID(f))[0..3] AS file_ids
+        ID(m) AS m_id, m.name AS module, m.description AS description, count(f) AS file_count, collect(ID(f))[0..3] AS file_ids
       ORDER BY file_count DESC
     `);
     const rows = (result.data ?? []) as Record<string, unknown>[];
@@ -207,7 +187,6 @@ export const getArchitectureTool = tool(
   },
 );
 
-// Export all tools
 export const graphTools = [
   queryGraphTool,
   findImpactTool,

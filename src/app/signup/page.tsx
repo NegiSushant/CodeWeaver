@@ -38,7 +38,7 @@ function SignUpForm() {
         throw new Error(data.error || "Failed to create account");
       }
 
-      // Automatically sign in after signup
+      // Automatic sign logic after signup
       const signInRes = await signIn("credentials", {
         email: email.trim(),
         password,

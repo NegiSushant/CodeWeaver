@@ -46,7 +46,7 @@ export default function NavLinks() {
         ))}
       </nav>
 
-      {/* Auth actions divider */}
+      {/* Auth actions*/}
       <div className="flex items-center gap-2 pl-2 sm:pl-3 border-l border-zinc-200 dark:border-zinc-800 text-xs sm:text-sm">
         {status === "loading" ? (
           <div className="h-8 w-16 animate-pulse rounded-lg bg-zinc-200/60 dark:bg-zinc-800/60" />
@@ -54,9 +54,13 @@ export default function NavLinks() {
           <div className="flex items-center gap-2">
             <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-zinc-100/80 dark:bg-zinc-800/60 border border-zinc-200/60 dark:border-zinc-700/50">
               <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#a3b18a] text-[10px] font-bold text-[#0f1410] shadow-xs">
-                {(session.user.name?.[0] || session.user.email?.[0] || "U").toUpperCase()}
+                {(
+                  session.user.name?.[0] ||
+                  session.user.email?.[0] ||
+                  "U"
+                ).toUpperCase()}
               </span>
-              <span className="max-w-[90px] sm:max-w-[130px] truncate font-medium text-xs text-zinc-800 dark:text-zinc-200">
+              <span className="max-w-22.5 sm:max-w-32.5 truncate font-medium text-xs text-zinc-800 dark:text-zinc-200">
                 {session.user.name || session.user.email}
               </span>
             </div>
@@ -91,4 +95,3 @@ export default function NavLinks() {
     </div>
   );
 }
-

@@ -13,7 +13,7 @@ export const SAMPLE_QUESTIONS = [
   "Which files implement Human-in-the-Loop?",
 ];
 
-export function SampleQuestions({
+export function ChatSampleQuestions({
   onSelectQuestion,
   disabled,
 }: SampleQuestionsProps) {
