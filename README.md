@@ -38,9 +38,8 @@ Every answer returned by CodeWeaver is **100% explainable**:
 
 ## 🎬 Demo
 
-- **Video Demo**: `[Demo Video Link - Loom / YouTube]` *(https://youtu.be/0gjnDK7I5U8)*
-- **Live Demo**: `http://localhost:3001` *(Follow setup instructions below to run locally)*
-- **Dev Article**: `somewhereondev`
+- **Video Demo**: `[Demo Video Link]`(https://youtu.be/0gjnDK7I5U8)
+- **Dev Article**: `[Dev Post Link]`(https://dev.to/devnegi/codeweaver-giving-ai-agents-real-context-with-a-codebase-knowledge-graph-252j)
 
 ---
 
