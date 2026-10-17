@@ -1,20 +1,58 @@
 import { tool } from "@langchain/core/tools";
 import { z } from "zod";
 import { getCodeGraph } from "@/lib/falkordb";
+import type { ToolResult } from "@/types/graph";
 
+// ─── Helpers ────────────────────────────────────────────────────────────────
+/**
+ * Extract unique numeric node IDs from a raw FalkorDB result set.
+ * Each row may carry one or more `_id` columns produced by `ID(node)` calls
+ * in the Cypher query. We collect every numeric value found under those keys.
+ */
+function extractNodeIds(rows: Record<string, unknown>[]): number[] {
+  const ids = new Set<number>();
+  for (const row of rows) {
+    for (const [key, val] of Object.entries(row)) {
+      if (key.endsWith("_id") && typeof val === "number") {
+        ids.add(val);
+      }
+    }
+  }
+  return [...ids];
+}
 //General Graph Query
 export const queryGraphTool = tool(
-  async ({ cypher }) => {
+  async ({ cypher }): Promise<string> => {
     const graph = await getCodeGraph();
     const result = await graph.query(cypher);
-    return JSON.stringify(result.data, null, 2);
+    const rows = (result.data ?? []) as Record<string, unknown>[];
+    const nodeIds = extractNodeIds(rows);
+    // If the query returned node objects themselves (not plain values),
+    // attempt to pull .id off them as a fallback.
+    if (nodeIds.length === 0) {
+      for (const row of rows) {
+        for (const val of Object.values(row)) {
+          if (
+            val !== null &&
+            typeof val === "object" &&
+            "id" in val &&
+            typeof (val as { id: unknown }).id === "number"
+          ) {
+            nodeIds.push((val as { id: number }).id);
+          }
+        }
+      }
+    }
+    const payload: ToolResult = { data: rows, nodeIds };
+    return JSON.stringify(payload, null, 2);
   },
   {
     name: "query_graph",
-    description: `Execute a Cypher query on the codebase knowledge graph. 
-    Use this for complex questions about structure, relationships, and architecture.
-    Available node labels: File, Function, Class, Module, Feature, Person
-    Available relationships: BELONGS_TO, CALLS, USES, IMPLEMENTS, OWNED_BY, RELATED_TO`,
+    description: `Execute a Cypher query on the codebase knowledge graph.
+Use this for complex questions about structure, relationships, and architecture.
+Available node labels: File, Function, Class, Module, Feature, Person
+Available relationships: BELONGS_TO, CALLS, USES, IMPLEMENTS, OWNED_BY, RELATED_TO
+To capture node IDs in your query, include ID(n) AS n_id in the RETURN clause.`,
     schema: z.object({
       cypher: z.string().describe("The Cypher query to execute"),
     }),
@@ -23,23 +61,27 @@ export const queryGraphTool = tool(
 
 //Find Impact of a File/Function
 export const findImpactTool = tool(
-  async ({ name }) => {
+  async ({ name }): Promise<string> => {
     const graph = await getCodeGraph();
     const result = await graph.query(
       `
       MATCH (n)
       WHERE n.name CONTAINS $name OR n.path CONTAINS $name
       OPTIONAL MATCH (n)<-[:BELONGS_TO|CALLS|USES*1..2]-(dependent)
-      RETURN DISTINCT 
-        labels(n)[0] as type,
-        n.name as name,
-        n.path as path,
-        collect(DISTINCT dependent.name) as impacted_by
+       RETURN DISTINCT
+        ID(n)         AS n_id,
+        labels(n)[0]  AS type,
+        n.name        AS name,
+        n.path        AS path,
+        collect(DISTINCT dependent.name) AS impacted_by
       LIMIT 15
       `,
       { params: { name } },
     );
-    return JSON.stringify(result.data, null, 2);
+    const rows = (result.data ?? []) as Record<string, unknown>[];
+    const nodeIds = extractNodeIds(rows);
+    const payload: ToolResult = { data: rows, nodeIds };
+    return JSON.stringify(payload, null, 2);
   },
   {
     name: "find_impact",
@@ -53,17 +95,25 @@ export const findImpactTool = tool(
 
 //Find Owners / Experts
 export const findOwnersTool = tool(
-  async ({ name }) => {
+  async ({ name }): Promise<string> => {
     const graph = await getCodeGraph();
     const result = await graph.query(
       `
       MATCH (n)-[:OWNED_BY]->(p:Person)
       WHERE n.name CONTAINS $name OR n.path CONTAINS $name
-      RETURN n.name as item, n.path as path, p.name as owner, p.role as role
-      `,
+      RETURN
+        ID(n) AS n_id,
+        ID(p) AS p_id,
+        n.name AS item,
+        n.path AS path,
+        p.name AS owner,
+        p.role AS role`,
       { params: { name } },
     );
-    return JSON.stringify(result.data, null, 2);
+    const rows = (result.data ?? []) as Record<string, unknown>[];
+    const nodeIds = extractNodeIds(rows);
+    const payload: ToolResult = { data: rows, nodeIds };
+    return JSON.stringify(payload, null, 2);
   },
   {
     name: "find_owners",
@@ -76,18 +126,27 @@ export const findOwnersTool = tool(
 
 //Explain Feature Implementation
 export const explainFeatureTool = tool(
-  async ({ featureName }) => {
+  async ({ featureName }): Promise<string> => {
     const graph = await getCodeGraph();
     const result = await graph.query(
       `
       MATCH (n)-[:IMPLEMENTS]->(f:Feature)
       WHERE f.name CONTAINS $featureName
-      RETURN f.name as feature, f.description as description,
-             labels(n)[0] as type, n.name as name, n.path as path
+      RETURN
+        ID(n) AS n_id,
+        ID(f) AS f_id,
+        f.name        AS feature,
+        f.description AS description,
+        labels(n)[0]  AS type,
+        n.name        AS name,
+        n.path        AS path
       `,
       { params: { featureName } },
     );
-    return JSON.stringify(result.data, null, 2);
+    const rows = (result.data ?? []) as Record<string, unknown>[];
+    const nodeIds = extractNodeIds(rows);
+    const payload: ToolResult = { data: rows, nodeIds };
+    return JSON.stringify(payload, null, 2);
   },
   {
     name: "explain_feature",
@@ -104,12 +163,16 @@ export const explainFeatureTool = tool(
 
 //Get Architecture Overview
 export const getArchitectureTool = tool(
-  async () => {
+  async (): Promise<string> => {
     const graph = await getCodeGraph();
     const result = await graph.query(`
       MATCH (m:Module)
       OPTIONAL MATCH (f:File)-[:BELONGS_TO]->(m)
-      RETURN m.name as module, m.description as description, count(f) as file_count
+      RETURN
+        ID(m)         AS m_id,
+        m.name        AS module,
+        m.description AS description,
+        count(f)      AS file_count
       ORDER BY file_count DESC
     `);
     return JSON.stringify(result.data, null, 2);

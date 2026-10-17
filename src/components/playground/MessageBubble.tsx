@@ -14,8 +14,10 @@ export function MessageBubble({ message }: MessageBubbleProps) {
     >
       <div
         className={cn(
-          "max-w-[80%] rounded-2xl px-4 py-3 text-sm leading-relaxed",
-          isUser ? "bg-violet-600 text-white" : "bg-zinc-800 text-zinc-100",
+          "max-w-[80%] rounded-2xl px-4 py-3 text-sm leading-relaxed shadow-2xs transition-colors",
+          isUser
+            ? "bg-emerald-600 text-white"
+            : "bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 border border-zinc-200/80 dark:border-zinc-800",
         )}
       >
         <div className="whitespace-pre-wrap">{message.content}</div>
