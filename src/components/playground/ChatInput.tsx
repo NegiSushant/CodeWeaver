@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, KeyboardEvent } from "react";
+import { ArrowUp, Loader2 } from "lucide-react";
 
 interface ChatInputProps {
   onSend: (message: string) => void;
@@ -23,24 +24,32 @@ export function ChatInput({ onSend, isLoading }: ChatInputProps) {
     }
   };
 
+  const isSendDisabled = isLoading || !input.trim();
+
   return (
-    <div className="border-t border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 p-4 transition-colors">
-      <div className="max-w-4xl mx-auto flex gap-3 items-end">
+    <div className="border-t border-zinc-200/80 dark:border-zinc-800 bg-white/80 dark:bg-[#121614]/80 backdrop-blur-md p-4 transition-colors">
+      <div className="max-w-3xl mx-auto flex gap-2.5 items-end">
         <textarea
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder="Ask about architecture, features, impact analysis..."
           rows={1}
-          className="flex-1 resize-none rounded-xl bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 px-4 py-3 text-sm text-zinc-900 dark:text-white placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-colors"
+          className="flex-1 resize-none rounded-xl bg-zinc-100/90 dark:bg-zinc-900/90 border border-zinc-200 dark:border-zinc-800 px-4 py-3 text-sm text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-[#a3b18a] focus:border-transparent transition-all"
           disabled={isLoading}
         />
         <button
+          type="button"
           onClick={handleSend}
-          disabled={isLoading || !input.trim()}
-          className="rounded-xl bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed text-white px-5 py-3 text-sm font-medium transition shadow-sm hover:shadow-md hover:shadow-emerald-500/20 active:scale-95 cursor-pointer"
+          disabled={isSendDisabled}
+          aria-label="Send message"
+          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#a3b18a] hover:bg-[#93a17a] active:scale-95 disabled:opacity-40 disabled:pointer-events-none disabled:active:scale-100 text-[#0f1410] shadow-2xs hover:shadow-xs transition-all cursor-pointer"
         >
-          Send
+          {isLoading ? (
+            <Loader2 className="h-4 w-4 animate-spin text-[#0f1410]" />
+          ) : (
+            <ArrowUp className="h-4.5 w-4.5 stroke-[2.5]" />
+          )}
         </button>
       </div>
     </div>

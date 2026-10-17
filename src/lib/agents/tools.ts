@@ -13,8 +13,25 @@ function extractNodeIds(rows: Record<string, unknown>[]): number[] {
   const ids = new Set<number>();
   for (const row of rows) {
     for (const [key, val] of Object.entries(row)) {
-      if (key.endsWith("_id") && typeof val === "number") {
+      if (
+        (key.endsWith("_id") || key === "id" || key === "nodeId") &&
+        typeof val === "number"
+      ) {
         ids.add(val);
+      } else if (
+        (key.endsWith("_ids") || key === "nodeIds") &&
+        Array.isArray(val)
+      ) {
+        for (const item of val) {
+          if (typeof item === "number") ids.add(item);
+        }
+      } else if (
+        val !== null &&
+        typeof val === "object" &&
+        "id" in val &&
+        typeof (val as { id: unknown }).id === "number"
+      ) {
+        ids.add((val as { id: number }).id);
       }
     }
   }
@@ -73,6 +90,7 @@ export const findImpactTool = tool(
         labels(n)[0]  AS type,
         n.name        AS name,
         n.path        AS path,
+        collect(DISTINCT ID(dependent)) AS dep_ids,
         collect(DISTINCT dependent.name) AS impacted_by
       LIMIT 15
       `,
@@ -172,10 +190,14 @@ export const getArchitectureTool = tool(
         ID(m)         AS m_id,
         m.name        AS module,
         m.description AS description,
-        count(f)      AS file_count
+        count(f)      AS file_count,
+        collect(ID(f))[0..3] AS file_ids
       ORDER BY file_count DESC
     `);
-    return JSON.stringify(result.data, null, 2);
+    const rows = (result.data ?? []) as Record<string, unknown>[];
+    const nodeIds = extractNodeIds(rows);
+    const payload: ToolResult = { data: rows, nodeIds };
+    return JSON.stringify(payload, null, 2);
   },
   {
     name: "get_architecture",

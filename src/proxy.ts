@@ -4,7 +4,8 @@ import { getToken } from "next-auth/jwt";
 
 export async function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
-  const isProtected = pathname.startsWith("/chat");
+  const isProtected =
+    pathname.startsWith("/chat") || pathname.startsWith("/graph");
 
   if (isProtected) {
     const token = await getToken({
@@ -31,6 +32,6 @@ export async function proxy(request: NextRequest) {
 export default proxy;
 
 export const config = {
-  matcher: ["/chat/:path*", "/chat"],
+  matcher: ["/chat/:path*", "/chat", "/graph/:path*", "/graph"],
 };
 

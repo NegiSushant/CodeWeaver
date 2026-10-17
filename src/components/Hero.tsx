@@ -23,17 +23,17 @@ export function Hero() {
         <div className="flex flex-wrap gap-4 mt-4">
           <Link
             href="/chat"
-            className="inline-flex items-center gap-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-medium px-6 py-3 transition shadow-sm hover:shadow-md hover:shadow-emerald-500/20 active:scale-95"
+            className="inline-flex items-center gap-2 rounded-xl bg-[#a3b18a] hover:bg-[#93a17a] dark:bg-[#a3b18a] dark:hover:bg-[#b5cca7] text-[#0f1410] font-semibold px-6 py-3 transition shadow-xs active:scale-95"
           >
             Try CodeWeaver
             <span>→</span>
           </Link>
-          <a
-            href="#how-it-works"
-            className="inline-flex items-center gap-2 rounded-xl border border-zinc-300 dark:border-zinc-700 hover:border-zinc-400 dark:hover:border-zinc-500 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100/60 dark:hover:bg-zinc-800/60 px-6 py-3 transition"
+          <Link
+            href="/graph"
+            className="inline-flex items-center gap-2 rounded-xl border border-zinc-300 dark:border-zinc-800 hover:border-zinc-400 dark:hover:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100/60 dark:hover:bg-zinc-800/60 px-6 py-3 text-sm font-medium transition"
           >
-            See how it works
-          </a>
+            Explore Graph
+          </Link>
         </div>
       </div>
     </section>

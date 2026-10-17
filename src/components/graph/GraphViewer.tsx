@@ -24,12 +24,17 @@ const DEFAULT_RADIUS = 5;
 interface GraphViewerProps {
   /** Node IDs that were part of the latest reasoning path */
   highlightedNodeIds: number[];
+  /** When true, only displays nodes in highlightedNodeIds and connecting links */
+  filterOnlyHighlighted?: boolean;
 }
 
 type FGNode = NodeObject<GraphNode>;
 type FGLink = LinkObject<GraphNode, GraphLink>;
 
-export function GraphViewer({ highlightedNodeIds }: GraphViewerProps) {
+export function GraphViewer({
+  highlightedNodeIds,
+  filterOnlyHighlighted = false,
+}: GraphViewerProps) {
   const { resolvedTheme } = useTheme();
   const isDark = resolvedTheme !== "light";
 
@@ -78,10 +83,25 @@ export function GraphViewer({ highlightedNodeIds }: GraphViewerProps) {
       })
       .then((data) => {
         if (cancelled) return;
-        setGraphData({
-          nodes: data.nodes as FGNode[],
-          links: data.links as FGLink[],
-        });
+        let nodes = data.nodes as FGNode[];
+        let links = data.links as FGLink[];
+
+        if (filterOnlyHighlighted) {
+          const targetIds = new Set(highlightedNodeIds.map(Number));
+          nodes = nodes.filter((n) => targetIds.has(Number(n.id)));
+          const activeNodeIds = new Set(nodes.map((n) => Number(n.id)));
+          links = links.filter((l) => {
+            const s = Number(
+              typeof l.source === "object" ? (l.source as FGNode).id : l.source,
+            );
+            const t = Number(
+              typeof l.target === "object" ? (l.target as FGNode).id : l.target,
+            );
+            return activeNodeIds.has(s) && activeNodeIds.has(t);
+          });
+        }
+
+        setGraphData({ nodes, links });
       })
       .catch((e: unknown) => {
         if (cancelled) return;
@@ -94,13 +114,15 @@ export function GraphViewer({ highlightedNodeIds }: GraphViewerProps) {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [filterOnlyHighlighted, highlightedNodeIds]);
 
   useEffect(() => {
-    if (highlightSet.size === 0 || !graphRef.current) return;
-    // Give the force engine a tick to settle
-    setTimeout(() => graphRef.current?.zoomToFit(400, 60), 300);
-  }, [highlightedNodeIds]); // eslint-disable-line react-hooks/exhaustive-deps
+    if (!graphRef.current) return;
+    const timer = setTimeout(() => {
+      graphRef.current?.zoomToFit(400, filterOnlyHighlighted ? 80 : 40);
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [highlightedNodeIds, graphData.nodes.length, filterOnlyHighlighted]);
 
   const paintNode = useCallback(
     (node: FGNode, ctx: CanvasRenderingContext2D) => {
@@ -125,15 +147,16 @@ export function GraphViewer({ highlightedNodeIds }: GraphViewerProps) {
       // Outer ring for highlighted nodes
       if (isHighlighted) {
         ctx.beginPath();
-        ctx.arc(node.x ?? 0, node.y ?? 0, r + 3, 0, 2 * Math.PI);
-        ctx.fillStyle = HIGHLIGHT_COLOR;
-        ctx.fill();
+        ctx.arc(node.x ?? 0, node.y ?? 0, r + 2.5, 0, 2 * Math.PI);
+        ctx.strokeStyle = HIGHLIGHT_COLOR;
+        ctx.lineWidth = 1.8;
+        ctx.stroke();
       }
 
       // Node body
       ctx.beginPath();
       ctx.arc(node.x ?? 0, node.y ?? 0, r, 0, 2 * Math.PI);
-      ctx.fillStyle = isHighlighted ? HIGHLIGHT_COLOR : baseColor;
+      ctx.fillStyle = filterOnlyHighlighted ? baseColor : (isHighlighted ? HIGHLIGHT_COLOR : baseColor);
       ctx.fill();
 
       // Label

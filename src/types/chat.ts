@@ -4,27 +4,14 @@ export interface Message {
   id: string;
   role: MessageRole;
   content: string;
-  createdAt: Date;
+  createdAt: Date | string;
+  reasoningNodeIds?: number[];
 }
 
-// export type MessageRole = "user" | "assistant";
-
-// export interface ChatMessage {
-//   id: string;
-//   role: MessageRole;
-//   content: string;
-//   createdAt: Date;
-//   sources?: string[];
-// }
-
-// export interface AskRequest {
-//   message: string;
-//   history: [];
-//   query: string;
-// }
-
-// export interface AskResponse {
-//   query: string;
-//   answer: string;
-//   sources: string[];
-// }
+export interface ChatSessionSummary {
+  id: string;
+  title: string;
+  createdAt: string;
+  updatedAt: string;
+  messageCount?: number;
+}
